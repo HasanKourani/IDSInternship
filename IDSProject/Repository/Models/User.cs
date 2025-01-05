@@ -14,28 +14,28 @@ public partial class User
     public int Id { get; set; }
 
     [Column("email")]
-    [StringLength(255)]
+    [StringLength(50)]
     [Unicode(false)]
     public string Email { get; set; } = null!;
 
     [Column("username")]
-    [StringLength(255)]
+    [StringLength(50)]
     [Unicode(false)]
     public string Username { get; set; } = null!;
 
     [Column("password")]
-    [StringLength(50)]
+    [StringLength(225)]
     [Unicode(false)]
     public string Password { get; set; } = null!;
 
     [Column("isAdmin")]
     public bool IsAdmin { get; set; }
 
-    [Column("dateCreated")]
-    public DateOnly DateCreated { get; set; }
+    [Column("dateCreated", TypeName = "datetime")]
+    public DateTime? DateCreated { get; set; } = DateTime.UtcNow;
 
     [Column("points")]
-    public long Points { get; set; }
+    public int Points { get; set; }
 
     [InverseProperty("User")]
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();

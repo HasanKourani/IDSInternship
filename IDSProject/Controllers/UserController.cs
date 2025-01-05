@@ -1,8 +1,13 @@
-﻿using IDSProject.DTOs;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using IDSProject.DTOs;
 using IDSProject.Repository;
 using IDSProject.Repository.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace IDSProject.Controllers
 {
@@ -11,16 +16,18 @@ namespace IDSProject.Controllers
     public class UserController : ControllerBase
     {
         private readonly IDSProjectDbContext dbContext;
-        public UserController(IDSProjectDbContext dbContext)
+        private readonly IConfiguration configuration;
+        public UserController(IDSProjectDbContext dbContext, IConfiguration configuration)
         {
             this.dbContext = dbContext;
+            this.configuration = configuration;
         }
-
-        [HttpGet("{id}")]
+        [Authorize]
+        [HttpGet("GetUser/{id}")]
         public IActionResult GetUserById(int id)
         {
             var user = dbContext.Users.Find(id);
-            if(user== null)
+            if (user == null)
             {
                 return NotFound();
             }
@@ -28,24 +35,36 @@ namespace IDSProject.Controllers
             return Ok(user);
         }
 
+        [HttpGet("GetUsers")]
+        public IActionResult GetAllUsers()
+        {
+            var users = dbContext.Users.ToList();
+
+            return Ok(users);
+        }
+
         [HttpPost("register")]
         public IActionResult Registration([FromBody] UserDTO newUserDTO)
         {
-            if(!ModelState.IsValid){
+            if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
             }
 
             var existingUser = dbContext.Users.FirstOrDefault(x => x.Email == newUserDTO.Email);
 
-            if (existingUser!=null)
+            if (existingUser != null)
             {
                 return BadRequest("A user with this email already exists");
             }
+
+            var password = newUserDTO.Password;
+            var hashedPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(password);
             dbContext.Users.Add(new User
             {
                 Email = newUserDTO.Email,
                 Username = newUserDTO.Username,
-                Password = newUserDTO.Password
+                Password = hashedPassword,
             });
             dbContext.SaveChanges();
             return Ok(newUserDTO);
@@ -54,35 +73,55 @@ namespace IDSProject.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDTO user)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            
+            var checkUser = dbContext.Users.FirstOrDefault(x => x.Email == user.Email);
 
-            var checkEmail = dbContext.Users.FirstOrDefault(x => x.Email == user.Email);
-            var checkPassword = dbContext.Users.FirstOrDefault(y => y.Password== user.Password);
-
-            if(checkEmail==null)
+            if (checkUser == null)
             {
-                return BadRequest("This email doesn't exist.");
-            }
-            if(checkPassword==null)
-            {
-                return BadRequest("Password is incorrect!");
+                return BadRequest("Email or Password is incorrect");
             }
 
-            return Ok(user);
+            if(!BCrypt.Net.BCrypt.EnhancedVerify(user.Password, checkUser.Password))
+            {
+                return BadRequest("Password is Wrong!");
+            }
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("Email", user.Email.ToString()),
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                configuration["Jwt:Issuer"],
+                configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.UtcNow.AddMinutes(120),
+                signingCredentials: signIn
+                );
+
+            string tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
+            return Ok(new { Token = tokenValue, UserEmail = user.Email,
+                Username = checkUser.Username, id = checkUser.Id,
+                IsAdmin = checkUser.IsAdmin});
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("EditUser/{id}")]
         public IActionResult EditProfile(int id, [FromBody] UserDTO user)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             var selectedUser = dbContext.Users.Find(id);
-            if(selectedUser==null)
+            if (selectedUser == null)
             {
                 return NotFound();
             }
@@ -95,11 +134,11 @@ namespace IDSProject.Controllers
             return Ok(selectedUser);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteUser/{id}")]
         public IActionResult DeleteAccount(int id)
         {
             var selectedUser = dbContext.Users.Find(id);
-            if(selectedUser==null)
+            if (selectedUser == null)
             {
                 return NotFound();
             }

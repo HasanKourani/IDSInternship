@@ -17,7 +17,7 @@ namespace IDSProject.Controllers
             this.dbContext = dbContext;
         }
 
-        [HttpGet]
+        [HttpGet("GetPosts")]
         public IActionResult GetAllPosts()
         {
             var allPosts = dbContext.Posts.ToList();
@@ -25,11 +25,11 @@ namespace IDSProject.Controllers
             return Ok(allPosts);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetPost/{id}")]
         public IActionResult GetPostById(int id)
         {
             var post = dbContext.Posts.Find(id);
-            if(post == null)
+            if (post == null)
             {
                 return NotFound();
             }
@@ -39,19 +39,18 @@ namespace IDSProject.Controllers
         [HttpPost("Create")]
         public IActionResult CheckNewPost([FromBody] PostDTO post)
         {
-            if(!ModelState.IsValid)
-            {   
+            if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
             }
 
             dbContext.Posts.Add(new Post
             {
-                Description  = post.Description,
+                Description = post.Description,
                 Title = post.Title,
-                Tag = post.Tag,
-                CategoryId = post.CategoryId,
+                Category = post.Category,
                 Image = post.Image,
-                DatePosted = DateTime.UtcNow,
+                TagId = post.TagId
 
             });
             dbContext.SaveChanges();
@@ -59,36 +58,36 @@ namespace IDSProject.Controllers
             return Ok(post);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("Edit/{id}")]
         public IActionResult EditPost(int id, [FromBody] Post post)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
             var selectedPost = dbContext.Posts.Find(id);
-            if(selectedPost == null)
+            if (selectedPost == null)
             {
                 return NotFound();
             }
 
             selectedPost.Title = post.Title;
             selectedPost.Description = post.Description;
-            selectedPost.Tag = post.Tag;
-            selectedPost.CategoryId = post.CategoryId;
-            selectedPost.DateUpdated = DateTime.Now;
+            selectedPost.TagId = post.TagId;
+            selectedPost.Category = post.Category;
+            selectedPost.DateUpdated = DateTime.UtcNow;
 
             dbContext.SaveChanges();
 
             return Ok(selectedPost);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         public IActionResult DeletePost(int id)
         {
             var post = dbContext.Posts.Find(id);
-            if(post == null)
+            if (post == null)
             {
                 return NotFound();
             }

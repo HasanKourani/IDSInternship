@@ -14,18 +14,20 @@ public partial class Notification
     public int Id { get; set; }
 
     [Column("userId")]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     [Column("context")]
+    [StringLength(50)]
+    [Unicode(false)]
     public string Context { get; set; } = null!;
 
     [Column("dateSent", TypeName = "datetime")]
-    public DateTime DateSent { get; set; }
+    public DateTime? DateSent { get; set; } = DateTime.UtcNow;
 
     [Column("isRead")]
     public bool IsRead { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("Notifications")]
-    public virtual User User { get; set; } = null!;
+    public virtual User? User { get; set; }
 }

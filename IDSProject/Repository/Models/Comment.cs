@@ -14,24 +14,25 @@ public partial class Comment
     public int Id { get; set; }
 
     [Column("context")]
+    [Unicode(false)]
     public string Context { get; set; } = null!;
 
     [Column("postId")]
-    public int PostId { get; set; }
+    public int? PostId { get; set; }
 
     [Column("userId")]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     [Column("dateCommented", TypeName = "datetime")]
-    public DateTime DateCommented { get; set; }
+    public DateTime? DateCommented { get; set; } = DateTime.UtcNow;
 
     [ForeignKey("PostId")]
     [InverseProperty("Comments")]
-    public virtual Post Post { get; set; } = null!;
+    public virtual Post? Post { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("Comments")]
-    public virtual User User { get; set; } = null!;
+    public virtual User? User { get; set; }
 
     [InverseProperty("Comment")]
     public virtual ICollection<Vote> Votes { get; set; } = new List<Vote>();

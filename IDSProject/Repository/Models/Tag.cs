@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IDSProject.Repository.Models;
 
-[Table("Category")]
-public partial class Category
+[Table("Tag")]
+public partial class Tag
 {
     [Key]
     [Column("id")]
@@ -18,6 +18,6 @@ public partial class Category
     [Unicode(false)]
     public string Name { get; set; } = null!;
 
-    [InverseProperty("Category")]
+    [InverseProperty("Tag")]
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 }

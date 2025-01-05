@@ -12,7 +12,7 @@ namespace IDSProject.DTOs
         public string Email { get; set; } = null!;
 
         [Column("password")]
-        [StringLength(50)]
+        [StringLength(225)]
         [Unicode(false)]
         public string Password { get; set; } = null!;
     }

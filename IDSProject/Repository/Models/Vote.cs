@@ -14,26 +14,26 @@ public partial class Vote
     public int Id { get; set; }
 
     [Column("userId")]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     [Column("postId")]
-    public int PostId { get; set; }
+    public int? PostId { get; set; }
 
     [Column("commentId")]
-    public int CommentId { get; set; }
+    public int? CommentId { get; set; }
 
     [Column("voteType")]
     public bool VoteType { get; set; }
 
     [ForeignKey("CommentId")]
     [InverseProperty("Votes")]
-    public virtual Comment Comment { get; set; } = null!;
+    public virtual Comment? Comment { get; set; }
 
     [ForeignKey("PostId")]
     [InverseProperty("Votes")]
-    public virtual Post Post { get; set; } = null!;
+    public virtual Post? Post { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("Votes")]
-    public virtual User User { get; set; } = null!;
+    public virtual User? User { get; set; }
 }

@@ -16,13 +16,13 @@ public partial class IDSProjectDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Category> Categories { get; set; }
-
     public virtual DbSet<Comment> Comments { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
     public virtual DbSet<Post> Posts { get; set; }
+
+    public virtual DbSet<Tag> Tags { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -30,74 +30,60 @@ public partial class IDSProjectDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=Hasanz-PC\\SQLEXPRESS;Initial Catalog=IDSProjectDatabase;Integrated Security=True;Trust Server Certificate=True");
+        => optionsBuilder.UseSqlServer("Data Source=hasanz-pc\\SQLEXPRESS;Initial Catalog=IDSProjectDatabase;Integrated Security=True;Trust Server Certificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Category>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Category__3213E83F4040E240");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-        });
-
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("PK__Comment__3213E83F899C4E12");
 
-            entity.HasOne(d => d.Post).WithMany(p => p.Comments)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Comment_Post");
+            entity.Property(e => e.DateCommented).HasDefaultValueSql("(getdate())");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Comments)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Comment_User");
+            entity.HasOne(d => d.Post).WithMany(p => p.Comments).HasConstraintName("FK__Comment__postId__5812160E");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Comments).HasConstraintName("FK__Comment__userId__59063A47");
         });
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("PK__Notifica__3213E83F0EFA75D0");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Notifications)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Notification_User");
+            entity.Property(e => e.DateSent).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Notifications).HasConstraintName("FK__Notificat__userI__534D60F1");
         });
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Post__3213E83FC9860A89");
+            entity.HasKey(e => e.Id).HasName("PK__Post__3213E83F9ADC996D");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.DatePosted).HasDefaultValueSql("(getdate())");
 
-            entity.HasOne(d => d.Category).WithMany(p => p.Posts)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Post_Category");
+            entity.HasOne(d => d.Tag).WithMany(p => p.Posts).HasConstraintName("FK__Post__tagId__4F7CD00D");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Posts)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Post_User");
+            entity.HasOne(d => d.User).WithMany(p => p.Posts).HasConstraintName("FK__Post__userId__4E88ABD4");
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Tag__3213E83FDC802443");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("PK__User__3213E83FE49298F9");
         });
 
         modelBuilder.Entity<Vote>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("PK__Vote__3213E83F32F6D551");
 
-            entity.HasOne(d => d.Comment).WithMany(p => p.Votes)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Vote_Comment");
+            entity.HasOne(d => d.Comment).WithMany(p => p.Votes).HasConstraintName("FK__Vote__commentId__5EBF139D");
 
-            entity.HasOne(d => d.Post).WithMany(p => p.Votes)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Vote_Post");
+            entity.HasOne(d => d.Post).WithMany(p => p.Votes).HasConstraintName("FK__Vote__postId__5DCAEF64");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Votes)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Vote_User");
+            entity.HasOne(d => d.User).WithMany(p => p.Votes).HasConstraintName("FK__Vote__userId__5CD6CB2B");
         });
 
         OnModelCreatingPartial(modelBuilder);

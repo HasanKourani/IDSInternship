@@ -14,40 +14,47 @@ public partial class Post
     public int Id { get; set; }
 
     [Column("userId")]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     [Column("description")]
+    [StringLength(50)]
+    [Unicode(false)]
     public string Description { get; set; } = null!;
 
     [Column("title")]
+    [StringLength(50)]
+    [Unicode(false)]
     public string Title { get; set; } = null!;
 
     [Column("image")]
+    [StringLength(50)]
+    [Unicode(false)]
     public string? Image { get; set; }
 
-    [Column("tag")]
-    [StringLength(255)]
-    public string? Tag { get; set; }
+    [Column("category")]
+    [StringLength(50)]
+    [Unicode(false)]
+    public string Category { get; set; } = null!;
 
-    [Column("categoryId")]
-    public int CategoryId { get; set; }
+    [Column("tagId")]
+    public int? TagId { get; set; }
 
     [Column("datePosted", TypeName = "datetime")]
-    public DateTime DatePosted { get; set; }
+    public DateTime? DatePosted { get; set; } = DateTime.UtcNow;
 
     [Column("dateUpdated", TypeName = "datetime")]
     public DateTime? DateUpdated { get; set; }
 
-    [ForeignKey("CategoryId")]
-    [InverseProperty("Posts")]
-    public virtual Category Category { get; set; } = null!;
-
     [InverseProperty("Post")]
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
+    [ForeignKey("TagId")]
+    [InverseProperty("Posts")]
+    public virtual Tag? Tag { get; set; }
+
     [ForeignKey("UserId")]
     [InverseProperty("Posts")]
-    public virtual User User { get; set; } = null!;
+    public virtual User? User { get; set; }
 
     [InverseProperty("Post")]
     public virtual ICollection<Vote> Votes { get; set; } = new List<Vote>();

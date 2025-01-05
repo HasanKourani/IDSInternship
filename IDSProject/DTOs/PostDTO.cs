@@ -18,7 +18,10 @@ namespace IDSProject.DTOs
         [StringLength(255)]
         public string? Tag { get; set; }
 
-        [Column("categoryId")]
-        public int CategoryId { get; set; }
+        [Column("category")]
+        public string Category { get; set; }
+
+        [Column("tagId")]
+        public int? TagId { get; set; }
     }
 }
