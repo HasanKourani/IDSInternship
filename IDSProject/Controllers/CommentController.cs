@@ -1,11 +1,13 @@
 ﻿using IDSProject.DTOs;
 using IDSProject.Repository;
 using IDSProject.Repository.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IDSProject.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class CommentController : ControllerBase
@@ -46,9 +48,23 @@ namespace IDSProject.Controllers
                 return BadRequest(ModelState);
             }
 
+            var post = dbContext.Posts.FirstOrDefault(p => p.Id == comment.PostId);
+            var user = dbContext.Users.FirstOrDefault(u => u.Id == comment.UserId);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+            if(user == null)
+            {
+                return NotFound();
+            }
+
             dbContext.Comments.Add(new Comment
             {
-                Context = comment.Context
+                Context = comment.Context,
+                PostId = comment.PostId,
+                UserId = comment.UserId
             });
 
             dbContext.SaveChanges();

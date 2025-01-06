@@ -26,13 +26,13 @@ public partial class User
     [Column("password")]
     [StringLength(225)]
     [Unicode(false)]
-    public string Password { get; set; } = null!;
+    public string? Password { get; set; }
 
     [Column("isAdmin")]
     public bool IsAdmin { get; set; }
 
     [Column("dateCreated", TypeName = "datetime")]
-    public DateTime? DateCreated { get; set; } = DateTime.UtcNow;
+    public DateTime? DateCreated { get; set; }
 
     [Column("points")]
     public int Points { get; set; }

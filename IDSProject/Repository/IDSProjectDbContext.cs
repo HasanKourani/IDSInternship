@@ -79,8 +79,6 @@ public partial class IDSProjectDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Vote__3213E83F32F6D551");
 
-            entity.HasOne(d => d.Comment).WithMany(p => p.Votes).HasConstraintName("FK__Vote__commentId__5EBF139D");
-
             entity.HasOne(d => d.Post).WithMany(p => p.Votes).HasConstraintName("FK__Vote__postId__5DCAEF64");
 
             entity.HasOne(d => d.User).WithMany(p => p.Votes).HasConstraintName("FK__Vote__userId__5CD6CB2B");

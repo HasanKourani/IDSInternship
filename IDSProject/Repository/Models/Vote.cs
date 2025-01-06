@@ -19,15 +19,8 @@ public partial class Vote
     [Column("postId")]
     public int? PostId { get; set; }
 
-    [Column("commentId")]
-    public int? CommentId { get; set; }
-
     [Column("voteType")]
     public bool VoteType { get; set; }
-
-    [ForeignKey("CommentId")]
-    [InverseProperty("Votes")]
-    public virtual Comment? Comment { get; set; }
 
     [ForeignKey("PostId")]
     [InverseProperty("Votes")]

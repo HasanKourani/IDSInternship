@@ -1,6 +1,7 @@
 ﻿using IDSProject.DTOs;
 using IDSProject.Repository;
 using IDSProject.Repository.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,6 +37,7 @@ namespace IDSProject.Controllers
             return Ok(post);
         }
 
+        [Authorize]
         [HttpPost("Create")]
         public IActionResult CheckNewPost([FromBody] PostDTO post)
         {
@@ -58,6 +60,7 @@ namespace IDSProject.Controllers
             return Ok(post);
         }
 
+        [Authorize]
         [HttpPut("Edit/{id}")]
         public IActionResult EditPost(int id, [FromBody] Post post)
         {
@@ -83,6 +86,7 @@ namespace IDSProject.Controllers
             return Ok(selectedPost);
         }
 
+        [Authorize]
         [HttpDelete("Delete/{id}")]
         public IActionResult DeletePost(int id)
         {
