@@ -1,4 +1,5 @@
-﻿using IDSProject.DTOs;
+﻿using System.Security.Claims;
+using IDSProject.DTOs;
 using IDSProject.Repository;
 using IDSProject.Repository.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -28,13 +29,19 @@ namespace IDSProject.Controllers
             }
 
             var post = dbContext.Posts.FirstOrDefault(p => p.Id == vote.PostId);
-            var user = dbContext.Users.FirstOrDefault(u => u.Id == vote.UserId);
+
+            var userIdClaim = User.FindFirst("Id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized("No userId in token");
+            }
 
             dbContext.Votes.Add(new Vote
             {
                 VoteType = vote.VoteType,
                 PostId = vote.PostId,
-                UserId = vote.UserId
+                UserId = userId
             });
 
             dbContext.SaveChanges();

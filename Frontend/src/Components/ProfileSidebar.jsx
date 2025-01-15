@@ -2,7 +2,7 @@ import React from "react";
 
 function ProfileSideBar() {
   return (
-    <div className="card col-lg-2 me-5 mt-5 p-2 d-xs-none d-lg-block">
+    <div className="card col-lg-2 me-5 mt-5 p-2 d-sm-none d-lg-block">
       <img
         src="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg"
         className="card-img-top rounded-pill"

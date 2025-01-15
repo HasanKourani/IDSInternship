@@ -19,7 +19,7 @@ function SideBar() {
             aria-current="page"
           >
             <FontAwesomeIcon icon={faHouse} />
-            <span className="d-lg-block d-xs-none">Home</span>
+            <span className="d-lg-block d-sm-none">Home</span>
           </Link>
         </li>
         <li>
@@ -28,7 +28,7 @@ function SideBar() {
             className="nav-link text-black d-flex align-items-center gap-3"
           >
             <FontAwesomeIcon icon={faArrowTrendUp} />
-            <span className="d-lg-block d-xs-none">Trending</span>
+            <span className="d-lg-block d-sm-none">Trending</span>
           </a>
         </li>
 
@@ -38,7 +38,7 @@ function SideBar() {
             className="nav-link text-black d-flex align-items-center gap-3"
           >
             <FontAwesomeIcon icon={faGlobe} />
-            <span className="d-lg-block d-xs-none">All</span>
+            <span className="d-lg-block d-sm-none">All</span>
           </a>
         </li>
         <li>
@@ -47,7 +47,7 @@ function SideBar() {
             className="nav-link text-black d-flex align-items-center gap-3"
           >
             <FontAwesomeIcon icon={faList} />
-            <span className="d-lg-block d-xs-none">By Category</span>
+            <span className="d-lg-block d-sm-none">By Category</span>
           </a>
         </li>
       </ul>

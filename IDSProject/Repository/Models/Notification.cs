@@ -22,7 +22,7 @@ public partial class Notification
     public string Context { get; set; } = null!;
 
     [Column("dateSent", TypeName = "datetime")]
-    public DateTime? DateSent { get; set; }
+    public DateTime? DateSent { get; set; } = DateTime.Now;
 
     [Column("isRead")]
     public bool IsRead { get; set; }

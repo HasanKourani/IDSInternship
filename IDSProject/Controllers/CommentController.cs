@@ -49,13 +49,15 @@ namespace IDSProject.Controllers
             }
 
             var post = dbContext.Posts.FirstOrDefault(p => p.Id == comment.PostId);
-            var user = dbContext.Users.FirstOrDefault(u => u.Id == comment.UserId);
+
+            var userIdClaim = User.FindFirst("Id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized("No userId in token");
+            }
 
             if (post == null)
-            {
-                return NotFound();
-            }
-            if(user == null)
             {
                 return NotFound();
             }
@@ -64,7 +66,7 @@ namespace IDSProject.Controllers
             {
                 Context = comment.Context,
                 PostId = comment.PostId,
-                UserId = comment.UserId
+                UserId = userId
             });
 
             dbContext.SaveChanges();

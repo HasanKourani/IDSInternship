@@ -22,7 +22,7 @@ namespace IDSProject.Controllers
             this.dbContext = dbContext;
             this.configuration = configuration;
         }
-        [Authorize]
+
         [HttpGet("GetUser/{id}")]
         public IActionResult GetUserById(int id)
         {
@@ -92,9 +92,10 @@ namespace IDSProject.Controllers
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
+                new Claim(JwtRegisteredClaimNames.Sub, "SocialAppToken"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("Email", user.Email.ToString()),
+                new Claim("Id", checkUser.Id.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
@@ -108,11 +109,17 @@ namespace IDSProject.Controllers
                 );
 
             string tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
-            return Ok(new { Token = tokenValue, UserEmail = user.Email,
-                Username = checkUser.Username, id = checkUser.Id,
-                IsAdmin = checkUser.IsAdmin});
+            return Ok(new 
+            { 
+                Token = tokenValue,
+                UserEmail = user.Email,
+                Username = checkUser.Username,
+                id = checkUser.Id,
+                IsAdmin = checkUser.IsAdmin
+            });
         }
 
+        [Authorize]
         [HttpPut("EditUser/{id}")]
         public IActionResult EditProfile(int id, [FromBody] UserDTO user)
         {
@@ -120,10 +127,23 @@ namespace IDSProject.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             var selectedUser = dbContext.Users.Find(id);
             if (selectedUser == null)
             {
                 return NotFound();
+            }
+
+            var userIdClaim = User.FindFirst("Id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized("No userId in token");
+            }
+
+            if(selectedUser.Id != userId)
+            {
+                return BadRequest("Can't edit others profiles");
             }
 
             selectedUser.Username = user.Username;
@@ -134,14 +154,30 @@ namespace IDSProject.Controllers
             return Ok(selectedUser);
         }
 
+        [Authorize]
         [HttpDelete("DeleteUser/{id}")]
         public IActionResult DeleteAccount(int id)
         {
+
+
             var selectedUser = dbContext.Users.Find(id);
             if (selectedUser == null)
             {
                 return NotFound();
             }
+
+            var userIdClaim = User.FindFirst("Id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized("No userId in token");
+            }
+
+            if (selectedUser.Id != userId)
+            {
+                return BadRequest("Can't delete others profiles");
+            }
+
             dbContext.Users.Remove(selectedUser);
             dbContext.SaveChanges();
 

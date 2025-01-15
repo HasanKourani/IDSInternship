@@ -23,7 +23,7 @@ public partial class Comment
     public int? UserId { get; set; }
 
     [Column("dateCommented", TypeName = "datetime")]
-    public DateTime? DateCommented { get; set; }
+    public DateTime? DateCommented { get; set; } = DateTime.Now;
 
     [ForeignKey("PostId")]
     [InverseProperty("Comments")]

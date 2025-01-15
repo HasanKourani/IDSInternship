@@ -11,8 +11,5 @@ namespace IDSProject.DTOs
 
         [Column("postId")]
         public int? PostId { get; set; }
-
-        [Column("userId")]
-        public int? UserId { get; set; }
     }
 }

@@ -32,7 +32,7 @@ public partial class User
     public bool IsAdmin { get; set; }
 
     [Column("dateCreated", TypeName = "datetime")]
-    public DateTime? DateCreated { get; set; }
+    public DateTime? DateCreated { get; set; } = DateTime.Now;
 
     [Column("points")]
     public int Points { get; set; }

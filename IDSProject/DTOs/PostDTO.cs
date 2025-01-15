@@ -14,14 +14,7 @@ namespace IDSProject.DTOs
         [Column("image")]
         public string? Image { get; set; }
 
-        [Column("tag")]
-        [StringLength(255)]
-        public string? Tag { get; set; }
-
         [Column("category")]
-        public string Category { get; set; }
-
-        [Column("tagId")]
-        public int? TagId { get; set; }
+        public string Category { get; set; } = null!;
     }
 }

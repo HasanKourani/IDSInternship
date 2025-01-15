@@ -40,7 +40,7 @@ public partial class Post
     public int? TagId { get; set; }
 
     [Column("datePosted", TypeName = "datetime")]
-    public DateTime? DatePosted { get; set; }
+    public DateTime? DatePosted { get; set; } = DateTime.Now;
 
     [Column("dateUpdated", TypeName = "datetime")]
     public DateTime? DateUpdated { get; set; }

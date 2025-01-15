@@ -45,7 +45,7 @@ function NavBar() {
             />
           </form>
           <ul className="navbar-nav col-lg-3 d-lg-flex col-lg-3 justify-content-lg-end">
-            <li className="nav-item d-lg-block d-xs-none">
+            <li className="nav-item d-lg-block d-sm-none">
               <Link
                 className="nav-link active d-flex align-items-center gap-2"
                 aria-current="page"

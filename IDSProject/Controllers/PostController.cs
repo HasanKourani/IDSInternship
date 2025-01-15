@@ -4,10 +4,11 @@ using IDSProject.Repository.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace IDSProject.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/posts")]
     [ApiController]
     public class PostController : ControllerBase
     {
@@ -18,15 +19,27 @@ namespace IDSProject.Controllers
             this.dbContext = dbContext;
         }
 
-        [HttpGet("GetPosts")]
+        [HttpGet]
         public IActionResult GetAllPosts()
         {
-            var allPosts = dbContext.Posts.ToList();
+            var allPosts = dbContext.Posts.
+                Include(p => p.User)
+                .Include(p => p.Tag)
+                .Select(p => new
+            {
+                p.Id,
+                p.Title,
+                p.Description,
+                p.Category,
+                p.DatePosted,
+                Username = p.User.Username,
+                TagName = p.Tag.Name
+            }).ToList();
 
             return Ok(allPosts);
         }
 
-        [HttpGet("GetPost/{id}")]
+        [HttpGet("{id}")]
         public IActionResult GetPostById(int id)
         {
             var post = dbContext.Posts.Find(id);
@@ -38,35 +51,58 @@ namespace IDSProject.Controllers
         }
 
         [Authorize]
-        [HttpPost("Create")]
-        public IActionResult CheckNewPost([FromBody] PostDTO post)
+        [HttpPost]
+        public IActionResult CheckNewPost([FromBody] PostAndTagDTO commonDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var userIdClaim = User.FindFirst("Id")?.Value;
+
+            if(string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized("No userId in token");
+            }
+
+            var newTag = new Tag
+            {
+                Name = commonDTO.Tag.Name
+            };
+
+            dbContext.Tags.Add(newTag);
+            dbContext.SaveChanges();
+
+            var newPost = new Post
+            {
+                Description = commonDTO.Post.Description,
+                Title = commonDTO.Post.Title,
+                Category = commonDTO.Post.Category,
+                Image = commonDTO.Post.Image,
+                UserId = userId,
+                TagId = newTag.Id
+            };
+
+            dbContext.Posts.Add(newPost);
+            dbContext.SaveChanges();
+
+            return Ok(commonDTO);
+        }
+
+        [Authorize]
+        [HttpPut("{id}")]
+        public IActionResult EditPost(int id, [FromBody] Post post)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            dbContext.Posts.Add(new Post
+            var userIdClaim = User.FindFirst("Id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
             {
-                Description = post.Description,
-                Title = post.Title,
-                Category = post.Category,
-                Image = post.Image,
-                TagId = post.TagId
-
-            });
-            dbContext.SaveChanges();
-
-            return Ok(post);
-        }
-
-        [Authorize]
-        [HttpPut("Edit/{id}")]
-        public IActionResult EditPost(int id, [FromBody] Post post)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
+                return Unauthorized("No userId in token");
             }
 
             var selectedPost = dbContext.Posts.Find(id);
@@ -75,26 +111,44 @@ namespace IDSProject.Controllers
                 return NotFound();
             }
 
+            if (selectedPost.UserId != userId)
+            {
+                return BadRequest("Can't edit others' posts");
+            }
+
             selectedPost.Title = post.Title;
             selectedPost.Description = post.Description;
             selectedPost.TagId = post.TagId;
             selectedPost.Category = post.Category;
-            selectedPost.DateUpdated = DateTime.UtcNow;
-
+            selectedPost.DateUpdated = DateTime.Now;
             dbContext.SaveChanges();
 
             return Ok(selectedPost);
         }
 
         [Authorize]
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("{id}")]
         public IActionResult DeletePost(int id)
         {
             var post = dbContext.Posts.Find(id);
+
+            var userIdClaim = User.FindFirst("Id")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized("No userId in token");
+            }
+
             if (post == null)
             {
                 return NotFound();
             }
+
+            if (post.UserId != userId)
+            {
+                return BadRequest("Can't delete others' posts");
+            }
+
             dbContext.Posts.Remove(post);
             dbContext.SaveChanges();
 
