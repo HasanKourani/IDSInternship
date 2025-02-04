@@ -1,6 +1,6 @@
-﻿using IDSProject.DTOs;
-using IDSProject.Repository;
-using IDSProject.Repository.Models;
+﻿using Backend.Repository;
+using Backend.Repository.Models;
+using IDSProject.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,8 +22,8 @@ namespace IDSProject.Controllers
         [HttpGet]
         public IActionResult GetAllPosts()
         {
-            var allPosts = dbContext.Posts.
-                Include(p => p.User)
+            var allPosts = dbContext.Posts
+                .Include(p => p.User)
                 .Include(p => p.Tag)
                 .Select(p => new
             {
@@ -32,6 +32,9 @@ namespace IDSProject.Controllers
                 p.Description,
                 p.Category,
                 p.DatePosted,
+                p.UserId,
+                p.Link,
+                p.Code,
                 Username = p.User.Username,
                 TagName = p.Tag.Name
             }).ToList();
@@ -42,12 +45,89 @@ namespace IDSProject.Controllers
         [HttpGet("{id}")]
         public IActionResult GetPostById(int id)
         {
-            var post = dbContext.Posts.Find(id);
+            var post = dbContext.Posts
+                .Include(p => p.User)
+                .Include(p => p.Tag)
+                .Where(p => p.Id == id)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Title,
+                    p.Description,
+                    p.Category,
+                    p.DatePosted,
+                    p.UserId,
+                    p.Link,
+                    p.Code,
+                    Username = p.User.Username,
+                    TagName = p.Tag.Name
+                }).FirstOrDefault();
             if (post == null)
             {
                 return NotFound();
             }
             return Ok(post);
+        }
+
+        [HttpGet("user/{userId}")]
+        public IActionResult GetPostByUserId(int userId)
+        {
+            var posts = dbContext.Posts.Where(x => x.UserId == userId).
+                Include(p => p.User).
+                Include(p => p.Tag).
+                Select(p => new
+                {
+                    p.Id,
+                    p.Title,
+                    p.Description,
+                    p.Category,
+                    p.DatePosted,
+                    p.UserId,
+                    p.Link,
+                    p.Code,
+                    Username = p.User.Username,
+                    TagName = p.Tag.Name
+                }).
+                ToList();
+
+            if(posts == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(posts);
+        }
+
+        [HttpGet("search")]
+        public IActionResult Search(string searchTerm)
+        {
+            var posts = dbContext.Posts.Where(p => p.Tag.Name.Contains(searchTerm)
+            || p.Category.Contains(searchTerm)
+            || p.User.Username.Contains(searchTerm)).
+                Include(p => p.User).
+                Include(p => p.Tag).
+                Select(p => new
+                {
+                    p.Id,
+                    p.Title,
+                    p.Description,
+                    p.Category,
+                    p.DatePosted,
+                    p.UserId,
+                    p.Link,
+                    p.Code,
+                    Username = p.User.Username,
+                    TagName = p.Tag.Name
+                }).
+                ToList();
+
+            if(!posts.Any())
+            {
+                NotFound();
+            }
+
+            return Ok(posts);
+            
         }
 
         [Authorize]
@@ -58,6 +138,7 @@ namespace IDSProject.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             var userIdClaim = User.FindFirst("Id")?.Value;
 
             if(string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
@@ -80,7 +161,9 @@ namespace IDSProject.Controllers
                 Category = commonDTO.Post.Category,
                 Image = commonDTO.Post.Image,
                 UserId = userId,
-                TagId = newTag.Id
+                TagId = newTag.Id,
+                Link = commonDTO.Post.Link,
+                Code = commonDTO.Post.Code
             };
 
             dbContext.Posts.Add(newPost);
@@ -91,7 +174,7 @@ namespace IDSProject.Controllers
 
         [Authorize]
         [HttpPut("{id}")]
-        public IActionResult EditPost(int id, [FromBody] Post post)
+        public IActionResult EditPost(int id, [FromBody] PostAndTagDTO common)
         {
             if (!ModelState.IsValid)
             {
@@ -115,15 +198,31 @@ namespace IDSProject.Controllers
             {
                 return BadRequest("Can't edit others' posts");
             }
+            var tag = dbContext.Tags.Find(selectedPost.TagId);
+            if (tag != null)
+            {
+                tag.Name = common.Tag.Name;
+            } else
+            {
+                var newTag = new Tag
+                {
+                    Name = common.Tag.Name
+                };
+                dbContext.Tags.Add(newTag);
+                dbContext.SaveChanges();
+                selectedPost.TagId = newTag.Id;
+            }
 
-            selectedPost.Title = post.Title;
-            selectedPost.Description = post.Description;
-            selectedPost.TagId = post.TagId;
-            selectedPost.Category = post.Category;
-            selectedPost.DateUpdated = DateTime.Now;
+
+            selectedPost.Title = common.Post.Title;
+            selectedPost.Description = common.Post.Description;
+            selectedPost.Category = common.Post.Category;
+            selectedPost.Image = common.Post.Image;
+            selectedPost.Link = common.Post.Link;
+            selectedPost.Code = common.Post.Code;
             dbContext.SaveChanges();
 
-            return Ok(selectedPost);
+            return Ok(common);
         }
 
         [Authorize]

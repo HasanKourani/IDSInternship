@@ -1,14 +1,10 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using IDSProject.DTOs;
-using IDSProject.Repository;
-using IDSProject.Repository.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using Backend.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IDSProject.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/tags")]
     [ApiController]
     public class TagController : ControllerBase
     {

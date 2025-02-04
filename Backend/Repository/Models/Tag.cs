@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace IDSProject.Repository.Models;
+namespace Backend.Repository.Models;
 
 [Table("Tag")]
 public partial class Tag
@@ -14,7 +14,7 @@ public partial class Tag
     public int Id { get; set; }
 
     [Column("name")]
-    [StringLength(50)]
+    [StringLength(255)]
     [Unicode(false)]
     public string Name { get; set; } = null!;
 

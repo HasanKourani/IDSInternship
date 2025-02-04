@@ -7,7 +7,7 @@ namespace IDSProject.DTOs
     public class TagDTO
     {
         [Column("name")]
-        [StringLength(50)]
+        [StringLength(225)]
         [Unicode(false)]
         public string Name { get; set; } = null!;
     }

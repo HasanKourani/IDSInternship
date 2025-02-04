@@ -1,6 +1,6 @@
-﻿using IDSProject.DTOs;
-using IDSProject.Repository;
-using IDSProject.Repository.Models;
+﻿using Backend.Repository;
+using Backend.Repository.Models;
+using IDSProject.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IDSProject.Controllers
 {
     
-    [Route("api/[controller]")]
+    [Route("api/comments")]
     [ApiController]
     public class CommentController : ControllerBase
     {
@@ -19,16 +19,31 @@ namespace IDSProject.Controllers
             this.dbContext = dbContext;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetComment(int id)
+        [HttpGet("{postId}")]
+        public IActionResult GetComment(int postId)
         {
-            var comment = dbContext.Comments.Find(id);
-            if(comment == null)
+            var comments = dbContext.Comments
+                .Where(x => x.PostId == postId)
+                .Join(dbContext.Users,
+                c => c.UserId,
+                u => u.Id,
+                (c, u) => new
+                {
+                    c.Id,
+                    c.Context,
+                    c.DateCommented,
+                    c.UserId,
+                    Username = u.Username
+                }
+                )
+                .ToList();
+
+            if (comments == null)
             {
                 return NotFound();
             }
 
-            return Ok(comment);
+            return Ok(comments);
         }
 
         [HttpGet("GetComments")]
@@ -40,6 +55,7 @@ namespace IDSProject.Controllers
             return Ok(allComments);
         }
 
+        [Authorize]
         [HttpPost("Add")]
         public IActionResult AddComment([FromBody] CommentDTO comment)
         {

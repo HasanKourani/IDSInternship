@@ -1,5 +1,5 @@
 using System.Text;
-using IDSProject.Repository;
+using Backend.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -67,19 +67,13 @@ GetConnectionString("IDSProjectDatabase")));
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
+    options.AddPolicy("AllowAll",
         policy => policy
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins("http://localhost:5173", "https://localhost:7217")
             .AllowAnyHeader()
             .AllowAnyMethod()
+            .AllowCredentials()
     );
-
-    options.AddPolicy("AllowSwagger", policy =>
-    {
-        policy.WithOrigins("https://localhost:7217")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
 });
 
 var app = builder.Build();
@@ -98,8 +92,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowSwagger");
-app.UseCors("AllowReactApp");
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 

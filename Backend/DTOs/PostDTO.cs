@@ -16,5 +16,11 @@ namespace IDSProject.DTOs
 
         [Column("category")]
         public string Category { get; set; } = null!;
+
+        [Column("link", TypeName = "text")]
+        public string? Link { get; set; }
+
+        [Column("code")]
+        public string? Code { get; set; }
     }
 }

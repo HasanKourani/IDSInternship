@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace IDSProject.Repository.Models;
+namespace Backend.Repository.Models;
 
 [Table("Post")]
 public partial class Post
@@ -17,22 +17,16 @@ public partial class Post
     public int? UserId { get; set; }
 
     [Column("description")]
-    [StringLength(50)]
-    [Unicode(false)]
     public string Description { get; set; } = null!;
 
     [Column("title")]
-    [StringLength(50)]
-    [Unicode(false)]
     public string Title { get; set; } = null!;
 
-    [Column("image")]
-    [StringLength(50)]
-    [Unicode(false)]
+    [Column("image", TypeName = "text")]
     public string? Image { get; set; }
 
     [Column("category")]
-    [StringLength(50)]
+    [StringLength(255)]
     [Unicode(false)]
     public string Category { get; set; } = null!;
 
@@ -40,10 +34,16 @@ public partial class Post
     public int? TagId { get; set; }
 
     [Column("datePosted", TypeName = "datetime")]
-    public DateTime? DatePosted { get; set; } = DateTime.Now;
+    public DateTime? DatePosted { get; set; }
 
     [Column("dateUpdated", TypeName = "datetime")]
     public DateTime? DateUpdated { get; set; }
+
+    [Column("link", TypeName = "text")]
+    public string? Link { get; set; }
+
+    [Column("code")]
+    public string? Code { get; set; }
 
     [InverseProperty("Post")]
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
@@ -55,7 +55,4 @@ public partial class Post
     [ForeignKey("UserId")]
     [InverseProperty("Posts")]
     public virtual User? User { get; set; }
-
-    [InverseProperty("Post")]
-    public virtual ICollection<Vote> Votes { get; set; } = new List<Vote>();
 }
